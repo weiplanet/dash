@@ -259,16 +259,45 @@ function getStore(type, dispatch) {
     return stores[type];
 }
 
-/* const noopTransform = {
+const noopTransform = {
     extract: propValue => propValue,
     apply: (storedValue, _propValue) => storedValue,
-}; */
+}; 
 
 
-const ifExtractTransform = {
-    extract: () => console.log('it ran my function'),
-    apply: () => console.log('my second function')
+const ifExtractTransform =  (element, propName, propPart) => {
+    console.dir(element)
+    console.dir(propName)
+    const dummyObject2 = element.persistenceMetamorphose[propName]
+    console.log('dummyObject2')
+    console.dir(dummyObject2)
+    console.log(dummyObject2.extract)
+    if (dummyObject2.extract !== 'undefined') {
+        console.log('there is an extract function for propName')
+        return dummyObject2
+    
+    } else {
+        console.log('nope nope')
+    }
 }
+const ifExtractTransformPropPart =  (element, propName, propPart) => {
+    console.dir(element)
+    console.dir(propName)
+    const dummyObject2 = element.persistenceMetamorphose[propName][propPart]
+    console.log('dummyObject2')
+    console.dir(dummyObject2)
+    console.log(dummyObject2.extract)
+    if (dummyObject2.extract !== 'undefined') {
+        console.log('there is an extract function for propPart')
+        return dummyObject2
+    
+    } else {
+        console.log('nope')
+        
+    }
+}
+
+
 
 const checkTypeObject = {
     extract: propValue => {
@@ -286,11 +315,72 @@ const checkTypeObject = {
 
 // add checkTypeObject to the return
 
-const getTransform = (element, propName, propPart) =>
-    propPart
-        ? checkTypeObject
-        : element.persistenceMetamorphose[propName];
+const getTransform = (element, propName, propPart) => {
+    console.log('getTransform')
+    if (typeof element.persistenceTransforms !== 'undefined') {
+    if (propPart) {
+        const dummyObject = element.persistenceTransforms[propName][propPart]
+        console.dir(element.persistenceTransforms)
+        console.log(typeof element.persistenceTransforms)
+        console.log('proppart')
+        console.dir(dummyObject)
+        console.log(`does have extract function? ${typeof dummyObject.extract === 'function'}`)
+        if (typeof dummyObject.extract === 'function') {
+            return dummyObject
+        } else return noopTransform
+    } else if (propName) {
+        console.log('checking if propName exists')
+        console.log(propName)
+        console.dir(element.persistenceTransforms)
+        console.log(typeof element.persistenceTransforms)
 
+        if (typeof element.persistenceTransforms !== 'undefined') {
+            console.log('making dummy object')
+            const dummyObject = element.persistenceTransforms[propName]
+            console.log('no propPart')
+            console.dir(dummyObject)
+            console.log(`does have extract function? ${typeof dummyObject.extract === 'function'}`)
+
+            if (typeof dummyObject.extract === 'function') {
+                return dummyObject
+            }
+    }
+    } else return noopTransform 
+  
+} else {
+    console.log('no persistence transforms')
+    return noopTransform
+} 
+}
+
+
+/* 
+const getTransform = (element, propName, propPart) => {
+    console.log('getTransform')
+    if (propPart) {
+        const dummyObject = element.persistenceTransforms[propName][propPart]
+        console.log('proppart')
+        console.dir(dummyObject)
+        console.log(`does have extract function? ${typeof dummyObject.extract === 'function'}`)
+        if (typeof dummyObject.extract === 'function') {
+            return dummyObject
+        } else noopTransform
+    } else if (propPart === 'undefined') {
+        console.log('checking if propName exists')
+        console.log(propPart)
+        if (propName !== 'undefined') {
+            const dummyObject = element.persistenceTransforms[propName]
+            console.log('no propPart')
+            console.dir(dummyObject)
+            console.log(`does have extract function? ${typeof dummyObject.extract === 'function'}`)
+
+            if (typeof dummyObject.extract === 'function') {
+                return dummyObject
+            } else noopTransform
+    }
+    } else noopTransform 
+  
+} */
 
 // to do in the am
 // * put getTransform back to how it originally was such that it doesn;t
@@ -360,6 +450,13 @@ export function recordUiEdit(layout, newProps, dispatch) {
         const [propName, propPart] = persistedProp.split('.');
         if (newProps[propName] !== undefined) {
             const storage = getStore(persistence_type, dispatch);
+            //console.log('using ifExtractTransform fun')
+            //console.log(`typeof if extract transform ${typeof ifExtractTransform}`)
+            //const dummyObject = ifExtractTransform(element, propName, propPart)
+            //console.log(`typeof dummyObject ${typeof dummyObject}`)
+            //console.dir(dummyObject)
+
+            //console.log(dummyObject.propName)
             const {extract} = getTransform(element, propName, propPart);
             console.log(`extract ${extract}`)
             console.log('type of:')
@@ -410,8 +507,8 @@ function modProp(key, storage, element, props, persistedProp, update, undo) {
         console.log('type of:')
         console.log(typeof transform)
         console.dir(transform)
-        console.log(transform.extract)
-        console.log(transform.apply)
+        //console.log(transform.extract)
+        //console.log(transform.apply)
 
         if (equals(fromVal, transform.extract(props[propName]))) {
             update[propName] = transform.apply(
