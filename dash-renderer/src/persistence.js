@@ -259,15 +259,59 @@ function getStore(type, dispatch) {
     return stores[type];
 }
 
-const noopTransform = {
+/* const noopTransform = {
     extract: propValue => propValue,
     apply: (storedValue, _propValue) => storedValue,
-};
+}; */
+
+
+const ifExtractTransform = {
+    extract: () => console.log('it ran my function'),
+    apply: () => console.log('my second function')
+}
+
+const checkTypeObject = {
+    extract: propValue => {
+        if(typeof propValue === 'function') {
+            (console.log(`it's a function`));
+        } else if (typeof propValue === 'undefined') {
+            (console.log(`it's undefined`))
+        } else {
+            (console.log(`it is ${typeof propValue}`))
+        }
+        (propValue)
+    },
+    apply: (storedValue, _propValue) => storedValue
+}
+
+// add checkTypeObject to the return
 
 const getTransform = (element, propName, propPart) =>
     propPart
+        ? checkTypeObject
+        : element.persistenceMetamorphose[propName];
+
+
+// to do in the am
+// * put getTransform back to how it originally was such that it doesn;t
+//   ruin persistence for everything else
+// * Make a new object for dealing with if there is an object that exists
+//   that has an extract function OR an object.object.extract that exists
+// * Currently working in this configuration with DPS
+
+/* const getTransform = (element, propName, propPart) =>
+    propPart
         ? element.persistenceTransforms[propName][propPart]
         : noopTransform;
+ */
+// so here we check to see if there is an extract or a apply function
+// then we do logic with it. 
+// if extract of apply function exists in persisted prop
+// //
+// or if object with extract or apply function exist
+// // 
+// this will essentiall replace the check for a propPart above.
+// modify it so it checks for extract or apply        
 
 const getValsKey = (id, persistedProp, persistence) =>
     `${id}.${persistedProp}.${JSON.stringify(persistence)}`;
@@ -312,11 +356,14 @@ export function recordUiEdit(layout, newProps, dispatch) {
     }
 
     forEach(persistedProp => {
+        console.log(persistedProp)
         const [propName, propPart] = persistedProp.split('.');
         if (newProps[propName] !== undefined) {
             const storage = getStore(persistence_type, dispatch);
             const {extract} = getTransform(element, propName, propPart);
-
+            console.log(`extract ${extract}`)
+            console.log('type of:')
+            console.log(typeof extract)
             const valsKey = getValsKey(id, persistedProp, persistence);
             let originalVal = extract(props[propName]);
             const newVal = extract(newProps[propName]);
@@ -353,11 +400,18 @@ export function applyPersistence(layout, dispatch) {
 const UNDO = true;
 function modProp(key, storage, element, props, persistedProp, update, undo) {
     if (storage.hasItem(key)) {
+        console.log('MOD PROP FUNC')
         const [newVal, originalVal] = storage.getItem(key);
         const fromVal = undo ? newVal : originalVal;
         const toVal = undo ? originalVal : newVal;
         const [propName, propPart] = persistedProp.split('.');
         const transform = getTransform(element, propName, propPart);
+        console.log(`transform ${transform}`)
+        console.log('type of:')
+        console.log(typeof transform)
+        console.dir(transform)
+        console.log(transform.extract)
+        console.log(transform.apply)
 
         if (equals(fromVal, transform.extract(props[propName]))) {
             update[propName] = transform.apply(
