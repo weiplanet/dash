@@ -280,107 +280,11 @@ const getTransform = (element, propName, propPart) => {
                 return persistenceObject;
             }
             return noopTransform;
-        } 
-            return noopTransform;
-        
-    } 
-        return noopTransform;
-    
-};
-
-/* 
-const getTransform = (element, propName, propPart) => {
-    console.log('getTransform');
-    if (typeof element.persistenceTransforms !== 'undefined') {
-        if (propPart) {
-            const dummyObject =
-                element.persistenceTransforms[propName][propPart];
-            console.dir(element.persistenceTransforms);
-            console.log(typeof element.persistenceTransforms);
-            console.log('proppart');
-            console.dir(dummyObject);
-            console.log(
-                `does have extract function? ${typeof dummyObject.extract ===
-                    'function'}`
-            );
-            if (typeof dummyObject.extract === 'function') {
-                return dummyObject;
-            } return noopTransform;
-        } else if (propName) {
-            console.log('checking if propName exists');
-            console.log(propName);
-            console.dir(element.persistenceTransforms);
-            console.log(typeof element.persistenceTransforms);
-
-            if (typeof element.persistenceTransforms !== 'undefined') {
-                console.log('making dummy object');
-                const dummyObject = element.persistenceTransforms[propName];
-                console.log('no propPart');
-                console.dir(dummyObject);
-                console.log(
-                    `does have extract function? ${typeof dummyObject.extract ===
-                        'function'}`
-                );
-
-                if (typeof dummyObject.extract === 'function') {
-                    return dummyObject;
-                }
-            }
-        } else {return noopTransform;}
-    } else {
-        console.log('no persistence transforms');
+        }
         return noopTransform;
     }
+    return noopTransform;
 };
- */
-/* 
-const getTransform = (element, propName, propPart) => {
-    console.log('getTransform')
-    if (propPart) {
-        const dummyObject = element.persistenceTransforms[propName][propPart]
-        console.log('proppart')
-        console.dir(dummyObject)
-        console.log(`does have extract function? ${typeof dummyObject.extract === 'function'}`)
-        if (typeof dummyObject.extract === 'function') {
-            return dummyObject
-        } else noopTransform
-    } else if (propPart === 'undefined') {
-        console.log('checking if propName exists')
-        console.log(propPart)
-        if (propName !== 'undefined') {
-            const dummyObject = element.persistenceTransforms[propName]
-            console.log('no propPart')
-            console.dir(dummyObject)
-            console.log(`does have extract function? ${typeof dummyObject.extract === 'function'}`)
-
-            if (typeof dummyObject.extract === 'function') {
-                return dummyObject
-            } else noopTransform
-    }
-    } else noopTransform 
-  
-} */
-
-// to do in the am
-// * put getTransform back to how it originally was such that it doesn;t
-//   ruin persistence for everything else
-// * Make a new object for dealing with if there is an object that exists
-//   that has an extract function OR an object.object.extract that exists
-// * Currently working in this configuration with DPS
-
-/* const getTransform = (element, propName, propPart) =>
-    propPart
-        ? element.persistenceTransforms[propName][propPart]
-        : noopTransform;
- */
-// so here we check to see if there is an extract or a apply function
-// then we do logic with it.
-// if extract of apply function exists in persisted prop
-// //
-// or if object with extract or apply function exist
-// //
-// this will essentiall replace the check for a propPart above.
-// modify it so it checks for extract or apply
 
 const getValsKey = (id, persistedProp, persistence) =>
     `${id}.${persistedProp}.${JSON.stringify(persistence)}`;
